@@ -84,4 +84,26 @@ The system prioritizes correctness and safety over convenience.
 
 ## Example Workflow
 
-1. Upload appointment CSV/XLSX (as currently used by the sh
+1. Upload appointment CSV/XLSX (as currently used by the showroom)
+2. Provide season (e.g. PFW26)
+3. J2 outputs a CRM-ready Opportunity CSV
+4. CSV is imported directly into the CRM
+
+See the `/examples` directory for sample input and output files.
+
+---
+
+## Why This Matters
+
+Many AI projects focus on content generation alone.
+This project focuses on operational reality:
+
+- respecting existing human workflows
+- enforcing data integrity
+- preventing AI hallucinations
+- supporting real-world adoption
+
+It demonstrates how AI can be introduced without requiring teams
+to relearn or abandon systems they already trust.
+
+---
