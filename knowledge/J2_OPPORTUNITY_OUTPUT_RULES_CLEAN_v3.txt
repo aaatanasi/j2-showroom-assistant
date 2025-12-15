@@ -1,0 +1,124 @@
+J2_OPPORTUNITY_OUTPUT_RULES
+==================================================
+
+PURPOSE
+This document defines the strict transformation rules J2 Showroom Assistant must follow
+when converting appointment data (CSV/XLSX) into CRM-importable Opportunity records.
+
+This file governs transformation logic only (row splitting, brand extraction, event mapping,
+status rules, defaults). The output CSV must conform EXACTLY to the schema defined in:
+J2_OPPORTUNITY_TEMPLATE_SCHEMA_CLEAN.txt
+
+==================================================
+A. REQUIRED USER INPUT
+==================================================
+
+SEASON (MANDATORY)
+- Season must always be explicitly provided by the user.
+- Do not infer Season from filenames, dates, or notes.
+- If Season is not provided, stop and ask a single clarification question.
+- Do not generate output until Season is provided.
+
+==================================================
+B. BRAND EXTRACTION (SOURCE OF TRUTH)
+==================================================
+
+PRIMARY RULE
+- Create opportunities ONLY from the column named: "Noted"
+
+FALLBACK RULE
+- If the "Noted" column does NOT exist in the input file:
+  - Use the column named "Additional Brands" as the source of brands.
+
+IGNORE RULES
+- If "Noted" exists, ALWAYS ignore "Additional Brands"
+- Do NOT use any other brand-related columns (including "Brand(s)" or similar)
+- Do NOT use "Ordered" to create opportunities
+
+BLANK HANDLING
+- If "Noted" exists but is blank for a row, do NOT create any opportunity rows for that appointment.
+- If "Noted" does not exist and "Additional Brands" is blank, do NOT create any opportunity rows.
+
+MULTI-BRAND HANDLING
+- If the source column contains multiple brands, split into multiple opportunity rows (one per brand).
+- Deduplicate brands within the same appointment row.
+
+BRAND NORMALIZATION
+- Normalize brands according to the allowed list in J2_OPPORTUNITY_TEMPLATE_SCHEMA_CLEAN.txt
+- Output brands in uppercase text with preserved punctuation.
+- Handle unknown brands according to the schema rules.
+
+==================================================
+C. OPPORTUNITY STATUS RULES
+==================================================
+
+- Default Opportunity_Status = "Notes"
+- Set Opportunity_Status = "Order(won)" ONLY if the source data explicitly contains the literal string:
+  - "Order(won)"
+- Do NOT treat the following as Order(won):
+  - Ordered
+  - Confirmed
+  - Likely
+  - Verbal
+  - Soft order
+  - Any inferred commitment
+
+==================================================
+D. EVENT NAME MAPPING RULES
+==================================================
+
+Map Event Name using the rules below. Match case-insensitively.
+Check both location fields and notes.
+
+- If notes or location contain "virtual" → Event Name = "FACETIME"
+- If notes or location contain "FaceTime" → Event Name = "FACETIME"
+- If location contains "Paris" → Event Name = "PARIS"
+- If location contains "Milan" → Event Name = "MILAN"
+- If location contains "D&A NYC" → Event Name = "D&A NYC"
+- If location contains "D&A LA" → Event Name = "D&A LA"
+- If location contains "JSquared", "Chelsea", "NYC", or "New York" → Event Name = "SHOWROOM NYC"
+- Otherwise, use the location value exactly as written.
+
+==================================================
+E. DEFAULT VALUES
+==================================================
+
+Unless overridden by the user:
+- value = 3000
+- confidence = 80
+- Opportunity_Status = "Notes"
+
+==================================================
+F. OPPORTUNITY NOTE RULES
+==================================================
+
+- Opportunity_Note must be concise and factual.
+- Use appointment notes and relevant context from comments or logistical fields if helpful.
+- Do not embellish or add opinions.
+- Preserve important qualifiers exactly as written.
+
+==================================================
+G. OUTPUT REQUIREMENTS
+==================================================
+
+- Output must be CSV only (no commentary) unless the user requests a summary.
+- Column headers and order must match J2_OPPORTUNITY_TEMPLATE_SCHEMA_CLEAN.txt exactly.
+- Never invent missing values. Leave blank if not present.
+
+==================================================
+H. VALIDATION BEHAVIOR
+==================================================
+
+Before output:
+- Verify Season is provided.
+- Verify at least one of the following columns exists: "Noted" or "Additional Brands"
+- Verify at least one valid brand is present per output row.
+- Verify columns match the schema.
+
+If validation fails:
+- Ask one concise clarification question.
+- Do not generate partial output.
+
+==================================================
+END OF DOCUMENT
+==================================================

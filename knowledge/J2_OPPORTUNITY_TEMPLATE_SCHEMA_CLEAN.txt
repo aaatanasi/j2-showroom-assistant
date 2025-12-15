@@ -1,0 +1,98 @@
+J2_OPPORTUNITY_TEMPLATE_SCHEMA
+==================================================
+
+PURPOSE
+This document defines the exact CRM Opportunity CSV schema that J2 Showroom Assistant must follow
+when generating files for import.
+
+This schema is authoritative.
+Column names, order, normalization rules, and allowed values must not be changed.
+
+==================================================
+A. COLUMN ORDER (STRICT)
+==================================================
+
+The CRM Opportunity CSV must contain the following columns in this exact order:
+
+1. lead_Name
+2. value
+3. value_period
+4. date_won
+5. confidence
+6. pipeline_name
+7. Opportunity_Status
+8. Opportunity_Note
+9. opportunity_custom.Brand
+10. opportunity_custom.Season
+11. opportunity_custom.Event Name
+
+RULES:
+- Do not reorder columns.
+- Do not rename headers.
+- Leave fields blank if data is not available.
+
+==================================================
+B. opportunity_custom.Brand
+==================================================
+
+SOURCE INPUT RULE
+- Brand names in the source data may appear in any case or formatting.
+- J2 must normalize valid brands to UPPERCASE text values in the output.
+
+ALLOWED BRAND VALUES (OUTPUT – TEXT)
+The following values are the ONLY valid text entries for opportunity_custom.Brand in the output CSV:
+
+- ALYSI
+- DIEGA
+- PREMIATA
+- K&S
+- IVA
+- CASADEI
+- BEATRICE B.
+- NO. 21
+- SERGIO S.
+
+NORMALIZATION RULES
+- Trim leading and trailing spaces.
+- Preserve punctuation exactly as written (periods, ampersands).
+- Treat all values as TEXT, not numeric.
+- Specifically ensure that "NO. 21" is output as text and never coerced into a number.
+
+UNKNOWN BRAND HANDLING
+- If a brand in the source data does not match one of the allowed values:
+  - Leave opportunity_custom.Brand blank
+  - Add a short note in Opportunity_Note indicating the unknown brand
+  - Ask a clarification question before final output if multiple rows are affected.
+
+==================================================
+C. opportunity_custom.Season
+==================================================
+
+- Season must be provided explicitly by the user.
+- Do not infer Season from filenames, dates, or notes.
+- Use the Season value exactly as provided.
+- Apply the same Season to all generated rows unless otherwise specified.
+
+==================================================
+D. opportunity_custom.Event Name
+==================================================
+
+Event Name must follow mapping rules defined in:
+J2_OPPORTUNITY_OUTPUT_RULES.txt
+
+Do not invent new event names.
+
+==================================================
+E. DATA SAFETY RULES
+==================================================
+
+- Never invent missing values.
+- Never infer financial or sales status.
+- Preserve factual notes only.
+- If required fields are missing or invalid:
+  - Ask one concise clarification question.
+  - Do not generate partial output.
+
+==================================================
+END OF DOCUMENT
+==================================================
